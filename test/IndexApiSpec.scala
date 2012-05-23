@@ -59,6 +59,8 @@ class IndexApiSpec extends Specification with TestContext {
 
         mongoCache.size must equalTo(2)
 
+        Thread.sleep(10000)
+
         val queryByType = SolrQueryService.getSolrResponseFromServer(new SolrQuery("delving_orgId:delving delving_recordType:book"))
         val queryById = SolrQueryService.getSolrResponseFromServer(new SolrQuery("delving_orgId:delving id:delving_movie_456"))
 
@@ -183,6 +185,8 @@ class IndexApiSpec extends Specification with TestContext {
                     </indexResponse>
 
       trim(XML.loadString(contentAsString(result))) must equalTo(trim(expected))
+
+      Thread.sleep(10000)
 
       val queryByHasDigitalObject = SolrQueryService.getSolrResponseFromServer(new SolrQuery("delving_orgId:delving delving_recordType:foo delving_hasDigitalObject:true"))
 

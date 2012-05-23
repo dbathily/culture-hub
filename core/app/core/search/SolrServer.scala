@@ -26,6 +26,7 @@ import org.apache.solr.client.solrj.response.{FacetField, UpdateResponse, QueryR
 import collection.JavaConverters._
 import play.api.cache.Cache
 import org.apache.solr.client.solrj.impl.{ConcurrentUpdateSolrServer, HttpSolrServer, StreamingUpdateSolrServer, CommonsHttpSolrServer}
+import core.indexing.IndexingService
 
 
 /**
@@ -68,17 +69,15 @@ object SolrServer {
 //  streamingUpdateServer.setAllowCompression(false)
 //  streamingUpdateServer.setMaxRetries(1) // defaults to 0.  > 1 not recommended.
 
-  def deleteFromSolrById(id: String): UpdateResponse = streamingUpdateServer.deleteById(id)
+  def deleteFromSolrById(id: String): UpdateResponse = streamingUpdateServer.deleteById(id, IndexingService.COMMIT_WITHIN)
 
   def deleteFromSolrById(id: ObjectId): UpdateResponse = {
     val response = deleteFromSolrById(id.toString)
-    commit()
     response
   }
 
   def deleteFromSolrByQuery(query: String) = {
-    val response = streamingUpdateServer.deleteByQuery(query)
-    commit()
+    val response = streamingUpdateServer.deleteByQuery(query, IndexingService.COMMIT_WITHIN)
     response
   }
 

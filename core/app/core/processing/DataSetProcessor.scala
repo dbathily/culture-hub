@@ -155,7 +155,6 @@ object DataSetProcessor {
       case DataSetState.PROCESSING.name =>
         if(indexingFormat.isDefined) {
           IndexingService.deleteOrphansBySpec(orgId, spec, startIndexing)
-          Indexing.commit()
         }
         DataSet.updateState(dataSet, DataSetState.ENABLED)
       case DataSetState.UPLOADED.name => // do nothing, this processing was cancelled

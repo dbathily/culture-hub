@@ -8,16 +8,19 @@ import org.apache.solr.common.SolrInputDocument
 import org.joda.time.DateTime
 import org.joda.time.format.DateTimeFormat
 import org.apache.solr.client.solrj.SolrQuery
+import org.apache.solr.client.solrj.request.UpdateRequest
 
 /**
  * Indexing API
  */
 object IndexingService extends SolrServer {
 
+  val COMMIT_WITHIN = 5000
+
   /**
    * Stages a SOLR InputDocument for indexing, and applies all generic delving mechanisms on top
    */
-  def stageForIndexing(doc: SolrInputDocument) {
+  def stageForIndexing(doc: SolrInputDocument) = {
     import scala.collection.JavaConversions._
 
     val hasDigitalObject: Boolean = !doc.entrySet().filter(entry => entry.getKey.startsWith(THUMBNAIL) && !entry.getValue.isEmpty).isEmpty
@@ -34,14 +37,15 @@ object IndexingService extends SolrServer {
     doc.addField(RECORD_TYPE + "_facet", doc.getField(RECORD_TYPE).getFirstValue)
     doc.addField(HAS_DIGITAL_OBJECT + "_facet", hasDigitalObject)
 
-    getStreamingUpdateServer.add(doc)
+    // see http://wiki.apache.org/solr/CommitWithin
+    getStreamingUpdateServer.add(doc, COMMIT_WITHIN)
   }
 
   /**
    * Commits staged Things or MDRs to index
     */
   def commit() = {
-    getStreamingUpdateServer.commit()
+    getStreamingUpdateServer.commit(false, false)
   }
 
   /**
@@ -55,16 +59,14 @@ object IndexingService extends SolrServer {
    * Deletes from the index by string ID
    */
   def deleteById(id: String) {
-    getStreamingUpdateServer.deleteById(id)
-    commit()
+    getStreamingUpdateServer.deleteById(id, COMMIT_WITHIN)
   }
 
   /**
    * Deletes from the index by ObjectId
    */
   def deleteById(id: ObjectId) {
-    SolrServer.deleteFromSolrById(id)
-    commit()
+    deleteById(id.toString)
   }
 
   /**
@@ -72,7 +74,6 @@ object IndexingService extends SolrServer {
    */
   def deleteByQuery(query: String) {
     SolrServer.deleteFromSolrByQuery(query)
-    commit()
   }
 
   /**
@@ -81,9 +82,8 @@ object IndexingService extends SolrServer {
   def deleteBySpec(orgId: String, spec: String) {
     val deleteQuery = SPEC + ":" + spec + " " + ORG_ID + ":" + orgId
     Logger.info("Deleting dataset from Solr Index: %s".format(deleteQuery))
-    val deleteResponse = getStreamingUpdateServer.deleteByQuery(deleteQuery)
+    val deleteResponse = getStreamingUpdateServer.deleteByQuery(deleteQuery, COMMIT_WITHIN)
     deleteResponse.getStatus
-    getStreamingUpdateServer.commit
   }
 
   def deleteOrphansBySpec(orgId: String, spec: String, startIndexing: DateTime) {
@@ -92,9 +92,8 @@ object IndexingService extends SolrServer {
     val orphans = getSolrServer.query(new SolrQuery(deleteQuery)).getResults.getNumFound
     if (orphans > 0) {
       try {
-        val deleteResponse = getStreamingUpdateServer.deleteByQuery(deleteQuery)
+        val deleteResponse = getStreamingUpdateServer.deleteByQuery(deleteQuery, COMMIT_WITHIN)
         deleteResponse.getStatus
-        getStreamingUpdateServer.commit
         Logger.info("Deleting orphans %s from dataset from Solr Index: %s".format(orphans.toString, deleteQuery))
       }
       catch {

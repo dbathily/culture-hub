@@ -70,7 +70,6 @@ object Admin extends OrganizationController {
 
       IndexingService.stageForIndexing(doc)
     }
-    IndexingService.commit()
     items.size
   }
 

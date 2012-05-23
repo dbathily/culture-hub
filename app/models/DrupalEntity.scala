@@ -138,7 +138,6 @@ object DrupalEntity extends SalatDAO[DrupalEntity, ObjectId](collection = drupal
           (counter._1 + 1, counter._2 + coRefs.length)
         }
       }
-      IndexingService.commit()
       StoreResponse(records.length, recordCounter._2)
     }
     catch {
