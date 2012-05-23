@@ -77,7 +77,8 @@ object SolrServer {
   }
 
   def deleteFromSolrByQuery(query: String) = {
-    val response = streamingUpdateServer.deleteByQuery(query, IndexingService.COMMIT_WITHIN)
+    val response = streamingUpdateServer.deleteByQuery(query)
+    streamingUpdateServer.commit(false, false)
     response
   }
 

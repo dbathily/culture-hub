@@ -59,7 +59,8 @@ object IndexingService extends SolrServer {
    * Deletes from the index by string ID
    */
   def deleteById(id: String) {
-    getStreamingUpdateServer.deleteById(id, COMMIT_WITHIN)
+    getStreamingUpdateServer.deleteById(id)
+    commit()
   }
 
   /**
@@ -82,7 +83,8 @@ object IndexingService extends SolrServer {
   def deleteBySpec(orgId: String, spec: String) {
     val deleteQuery = SPEC + ":" + spec + " " + ORG_ID + ":" + orgId
     Logger.info("Deleting dataset from Solr Index: %s".format(deleteQuery))
-    val deleteResponse = getStreamingUpdateServer.deleteByQuery(deleteQuery, COMMIT_WITHIN)
+    val deleteResponse = getStreamingUpdateServer.deleteByQuery(deleteQuery)
+    commit()
     deleteResponse.getStatus
   }
 
@@ -92,7 +94,8 @@ object IndexingService extends SolrServer {
     val orphans = getSolrServer.query(new SolrQuery(deleteQuery)).getResults.getNumFound
     if (orphans > 0) {
       try {
-        val deleteResponse = getStreamingUpdateServer.deleteByQuery(deleteQuery, COMMIT_WITHIN)
+        val deleteResponse = getStreamingUpdateServer.deleteByQuery(deleteQuery)
+        commit()
         deleteResponse.getStatus
         Logger.info("Deleting orphans %s from dataset from Solr Index: %s".format(orphans.toString, deleteQuery))
       }
