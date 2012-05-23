@@ -95,26 +95,12 @@ object Index extends DelvingController {
                 indexed += 1
               }
           }
-          val response = IndexingService.commit()
-          // TODO this apparently doensn't work since the status is 200 in any case.
-          if(response.getStatus != 200) {
-            Logger("CultureHub").warn(
-              """Problem while indexing request via Index API:
-                |
-                | Response:
-                | %s
-                |
-                | Response header:
-                | %s
-                |
-              """.stripMargin.format(response.getResponse, response.getResponseHeader))
-          }
 
           val invalidItems = invalid.map(i => <invalidItem><error>{i._1}</error><item>{i._2}</item></invalidItem>)
 
           <indexResponse>
             <totalItemCount>{valid.size + invalid.size}</totalItemCount>
-            <indexedItemCount>{valid.filterNot(_.deleted).size}</indexedItemCount>
+            <indexedItemCount>{indexed}</indexedItemCount>
             <deletedItemCount>{valid.filter(_.deleted).size}</deletedItemCount>
             <invalidItemCount>{invalid.size}</invalidItemCount>
             <invalidItems>{invalidItems}</invalidItems>
