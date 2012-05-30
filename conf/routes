@@ -188,6 +188,7 @@ GET         /organizations/:orgId/api/collections                             co
 
 GET         /organizations/:orgId/api/index                                   controllers.api.Index.status(orgId)
 POST        /organizations/:orgId/api/index                                   controllers.api.Index.submit(orgId)
+POST        /organizations/:orgId/api/index                                   controllers.api.Index.reIndex(orgId)
 
 
 ## Legacy routes support

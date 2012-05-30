@@ -114,6 +114,26 @@ object Index extends DelvingController {
     }
   }
 
+  def reIndex(orgId: String) = Action {
+    implicit request =>
+      Async {
+        Promise.pure {
+
+          var reIndexed = 0
+          IndexItem.find(MongoDBObject("deleted" -> false)) foreach {
+            item =>
+              IndexingService.stageForIndexing(item.toSolrDocument)
+              reIndexed += 1
+          }
+
+          reIndexed
+
+        } map {
+          response => Ok(response.toString)
+        }
+      }
+  }
+
   private def parseIndexRequest(orgId: String, root: NodeSeq): (List[IndexItem], List[(String, NodeSeq)]) = {
     val validItems = new ListBuffer[IndexItem]()
     val invalidItems = new ListBuffer[(String, NodeSeq)]()
