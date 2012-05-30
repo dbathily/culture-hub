@@ -53,21 +53,13 @@ case class IndexItem(_id: ObjectId = new ObjectId,
     }
 
     // system fields
-    val allowedSystemFields = List("collection", "thumbnail", "landingPage", "provider", "owner", "title", "description", "fullText")
+    val allowedSystemFields = List("thumbnail", "landingPage", "provider", "owner", "title", "description", "collection", "fullText")
 
     val systemFields = document.filter(_.label == "systemField")
     systemFields.filter(f => f.attribute("name").isDefined && allowedSystemFields.contains(f.attribute("name").get.text)).foreach {
       field =>
         val name = (field \ "@name").text
-
-        name match {
-          case "thumbnail" => doc.addField(THUMBNAIL, field.text)
-          case "title" | "description" | "fullText" =>
-            doc.addField("delving_%s_%s".format(name, "text"), field.text)
-          case _ =>
-            val indexFieldName = "delving_%s_%s".format(name, "string")
-            doc.addField(indexFieldName, field.text)
-        }
+        doc.addField("delving_" + name, field.text)
     }
 
     // mandatory fields

@@ -511,7 +511,9 @@
    <field name="delving_visibility" type="string" indexed="true" stored="true" multiValued="false" />
    <field name="delving_thumbnail" type="string" indexed="true" stored="true" multiValued="true"/>
    <field name="delving_hasDigitalObject" type="boolean" indexed="true" stored="true" multiValued="false"/>
-
+   <field name="delving_landingPage" type="string" indexed="true" stored="true" multiValued="true"/>
+   <field name="delving_collection" type="text_general" indexed="true" stored="true" multiValued="true"/>
+   <field name="delving_fullText" type="text_general" indexed="true" stored="true" multiValued="true"/>
 
    <!-- catchall field, containing all other searchable text fields (implemented
         via copyField further on in this schema  -->
