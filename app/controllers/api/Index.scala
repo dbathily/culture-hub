@@ -5,12 +5,12 @@ import play.api.mvc._
 import play.api.libs.concurrent.Promise
 import models.IndexItem
 import scala.xml._
-import collection.mutable.ListBuffer
 import core.Constants._
 import core.indexing.IndexingService
 import com.mongodb.casbah.commons.MongoDBObject
 import org.joda.time.format.ISODateTimeFormat
 import play.api.Logger
+import collection.mutable.{ArrayBuffer, ListBuffer}
 
 /**
  *
@@ -120,16 +120,24 @@ object Index extends DelvingController {
         Promise.pure {
 
           var reIndexed = 0
+          val error = new ArrayBuffer[String]()
           IndexItem.find(MongoDBObject("deleted" -> false)) foreach {
             item =>
-              IndexingService.stageForIndexing(item.toSolrDocument)
-              reIndexed += 1
+              try {
+                IndexingService.stageForIndexing(item.toSolrDocument)
+                reIndexed += 1
+              } catch {
+                case t =>
+                  val id = orgId + "_" + item.itemType + "_" + item.itemId
+                  Logger("IndexApi").error("Could not index item " + id, t)
+                  error += id
+              }
           }
 
-          reIndexed
+          (reIndexed, error)
 
         } map {
-          response => Ok(response.toString)
+          response => Ok("""ReIndexed %s items successfully, error for %s""".format(response._1.toString, response._2.mkString(", ")))
         }
       }
   }
