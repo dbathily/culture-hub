@@ -107,7 +107,7 @@ object SolrServer {
 
   def getSolrFields: List[SolrDynamicField] = {
 
-    Cache.getOrElse(SOLR_FIELDS, 120) {
+    Cache.getOrElse(SOLR_FIELDS, 7200) {
       computeSolrFields
     }
 

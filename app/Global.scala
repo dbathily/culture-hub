@@ -85,8 +85,8 @@ object Global extends GlobalSettings {
     // SOLR
     val solrCache = Akka.system.actorOf(Props[SolrCache])
     Akka.system.scheduler.schedule(
-      10 seconds,
-      120 seconds,
+      30 seconds,
+      120 minutes,
       solrCache,
       CacheSolrFields
     )
