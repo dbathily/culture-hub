@@ -16,33 +16,35 @@ import play.api.Logger
 
 object Search extends Controller with DomainConfigurationAware {
 
-  def searchApi(orgId: String, provider: Option[String], dataProvider: Option[String], collection: Option[String]) = Action {
-    implicit request =>
-      Async {
-        Promise.pure {
+  def searchApi(orgId: String, provider: Option[String], dataProvider: Option[String], collection: Option[String]) = DomainConfigured {
+    Action {
+      implicit request =>
+        Async {
+          Promise.pure {
 
-          if (!request.path.contains("api")) {
-            Logger("CultureHub").warn("Using deprecated API call " + request.uri)
+            if (!request.path.contains("api")) {
+              Logger("CultureHub").warn("Using deprecated API call " + request.uri)
+            }
+
+            val hiddenQueryFilters = ListBuffer[String]("%s:%s".format(RECORD_TYPE, ITEM_TYPE_MDR))
+
+            if (!orgId.isEmpty)
+              hiddenQueryFilters += "%s:%s".format(ORG_ID, orgId)
+
+            SearchService.getApiResult(Some(orgId), request, configuration, hiddenQueryFilters.toList)
+
+          } map {
+            // CORS - see http://www.w3.org/TR/cors/
+            result => result.withHeaders(
+              ("Access-Control-Allow-Origin" -> "*"),
+              ("Access-Control-Allow-Methods" -> "GET, POST, OPTIONS"),
+              ("Access-Control-Allow-Headers" -> "X-Requested-With"),
+              ("Access-Control-Max-Age" -> "86400")
+
+            )
           }
-
-          val hiddenQueryFilters = ListBuffer[String]("%s:%s".format(RECORD_TYPE, ITEM_TYPE_MDR))
-
-          if (!orgId.isEmpty)
-            hiddenQueryFilters += "%s:%s".format(ORG_ID, orgId)
-
-          SearchService.getApiResult(Some(orgId), request, configuration, hiddenQueryFilters.toList)
-
-        } map {
-          // CORS - see http://www.w3.org/TR/cors/
-          result => result.withHeaders(
-            ("Access-Control-Allow-Origin" -> "*"),
-            ("Access-Control-Allow-Methods" -> "GET, POST, OPTIONS"),
-            ("Access-Control-Allow-Headers" -> "X-Requested-With"),
-            ("Access-Control-Max-Age" -> "86400")
-
-          )
         }
-      }
+    }
   }
 
 }
