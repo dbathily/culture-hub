@@ -3,12 +3,11 @@ package core
 import models.DomainConfiguration
 import play.api.mvc._
 import util.DomainConfigurationHandler
-import eu.delving.templates.scala.GroovyTemplates
 import play.api.Logger
 import java.util.concurrent.ConcurrentHashMap
 
 trait DomainConfigurationAware {
-  self: Controller with GroovyTemplates =>
+  self: Controller =>
 
   private val domainConfigurations = new ConcurrentHashMap[RequestHeader, DomainConfiguration]()
 
@@ -20,7 +19,6 @@ trait DomainConfigurationAware {
         try {
           val configuration = DomainConfigurationHandler.getByDomain(request.domain)
           domainConfigurations.put(request, configuration)
-          renderArgs += ("themeInfo" -> new ThemeInfo(configuration))
           action(request)
         } catch {
           case t =>

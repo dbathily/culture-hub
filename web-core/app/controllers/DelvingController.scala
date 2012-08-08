@@ -64,6 +64,8 @@ trait ApplicationController extends Controller with GroovyTemplates with DomainC
           // action composition being applied after the template has been rendered, we need to pass it in this way
           renderArgs += (__LANG -> requestLanguage)
 
+          renderArgs += ("themeInfo" -> new ThemeInfo(configuration))
+
           // apply plugin handlers
           onApplicationRequestHandlers.foreach(handler => handler(RequestContext(request, configuration, renderArgs, getLang)))
 
