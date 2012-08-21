@@ -117,7 +117,7 @@ trait MDRCollection {
   }
 
   def upsertByLocalKey(updatedRecord: MetadataRecord) {
-    update(MongoDBObject("localRecordKey" -> updatedRecord.localRecordKey), updatedRecord, true, false, new WriteConcern())
+    update(MongoDBObject("localRecordKey" -> updatedRecord.localRecordKey), _grater.asDBObject(updatedRecord), true)
   }
 }
 

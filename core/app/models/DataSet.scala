@@ -231,11 +231,11 @@ object DataSet extends SalatDAO[DataSet, ObjectId](collection = dataSetsCollecti
   // ~~~ update. make sure you always work with the latest version from mongo after an update - operations are not atomic
 
   def updateById(id: ObjectId, dataSet: DataSet) {
-    update(MongoDBObject("_id" -> dataSet._id), dataSet, false, false, new WriteConcern())
+    save(dataSet)
   }
 
   def upsertById(id: ObjectId, dataSet: DataSet) {
-    update(MongoDBObject("_id" -> dataSet._id), dataSet, true, false, new WriteConcern())
+    update(MongoDBObject("_id" -> dataSet._id), _grater.asDBObject(dataSet), true)
   }
 
   def updateInvalidRecords(dataSet: DataSet, prefix: String, invalidIndexes: List[Int]) {
