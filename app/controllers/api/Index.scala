@@ -86,11 +86,11 @@ object Index extends DelvingController {
           valid.foreach {
             item =>
               if(item.deleted) {
-                IndexItem.remove(item.orgId, item.itemId, item.itemType)
+		IndexItem.delete(item.itemId, orgId, item.itemType)
                 IndexingService.deleteByQuery("""id:%s_%s_%s""".format(item.orgId, item.itemType, item.itemId))
                 deleted += 1
               } else {
-                IndexItem.update(MongoDBObject("itemId" -> item.itemId, "orgId" -> orgId, "itemType" -> item.itemType), IndexItem._grater.asDBObject(item), true)
+		IndexItem.update(orgId, item.itemId, item.itemType, item)
                 IndexingService.stageForIndexing(item.toSolrDocument)
                 indexed += 1
               }

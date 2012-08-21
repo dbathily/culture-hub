@@ -78,6 +78,10 @@ case class IndexItem(_id: ObjectId = new ObjectId,
 
 object IndexItem extends SalatDAO[IndexItem, ObjectId](collection = indexItemsCollection) {
 
+  def update(orgId: String, itemId: String, itemType: String, item: IndexItem) {
+    update(MongoDBObject("orgId" -> orgId, "itemId" -> itemId, "itemType" -> itemType), $set ("rawXml" -> item.rawXml, "deleted" -> item.deleted), true)
+  }
+
   def findOneById(id: String) = {
     if(id.split("_").length != 3) {
       None
@@ -87,7 +91,7 @@ object IndexItem extends SalatDAO[IndexItem, ObjectId](collection = indexItemsCo
     }
   }
 
-  def remove(itemId: String, orgId: String, itemType: String) {
-    remove(MongoDBObject("orgId" -> orgId, "itemId" -> itemId, "itemType" -> itemType))
+  def delete(itemId: String, orgId: String, itemType: String) {
+    findOne(MongoDBObject("orgId" -> orgId, "itemType" -> itemType, "itemId" -> itemId)).map(i => remove(i))
   }
 }
